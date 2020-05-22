@@ -55,3 +55,7 @@ table {
 #mat-butt{
   background-color: var(--second-color);
 }
+
+.my-pagination /deep/ .ngx-pagination .current {
+  background: var(--first-color) !important;
+}

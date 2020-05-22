@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { TasksService } from '../services/tasks.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -8,16 +8,7 @@ import { obj } from '../clases/obj';
 import { Practica } from '../clases/practica';
 import { Rop } from '../clases/rop';
 import { Router } from '@angular/router';
-
-// si todas las prácticas asociadas al objetivo tienen un nivel
-// muy alto de aplicación (5) el objetivo debería estar 100% ágilizado
-
-// Si todas las prácticas asociadas al objetivo tienen un nivel muy bajo de
-// aplicación NO debería salir un porcentaje muy alto de agilidad del objetivo.
-
-// Si todas las prácticas asociadas al objetivo tuvieran la misma contribución para ese objetivo
-// el porcentaje de agilidad del objetivo debería reducirse al promedio de porcentaje de aplicación
-// de las prácticas asociadas a él.
+import { MatPaginator } from '@angular/material';
 
 @Component({
   selector: 'app-evaluacion',
@@ -34,10 +25,14 @@ import { Router } from '@angular/router';
 
 export class EvaluacionComponent implements OnInit {
 
+
+
+  p: number = 1;
   newarrs: Eval[];
   idst: string;
   popupVisible = false;
   selectvalue = null;
+
 
   constructor(private authService: AuthService, private router: Router, private taskService: TasksService, public dialog: MatDialog) {
     this.idst = localStorage.getItem("ACCESS_IDS");
@@ -45,34 +40,27 @@ export class EvaluacionComponent implements OnInit {
   }
 
   ngOnInit() {
+
   }
 
   GenerarEvaluacion(e) {
-    // this.popupVisible = true;
     this.InsertEval(e);
   }
 
   InsertEval(e) {
-    //console.log(this.selectvalue);
     let DataEval = {
       id: this.idst
-      // workLine: "5e14e3353e702d0d2c2c26e5"
-      // workLine:this.selectvalue
     }
 
     this.authService.GuardarEvaluacion(DataEval).subscribe(res => {
+      this.GetEvalByUSR();
     });
-    location.reload();
-  }
 
-  listValueChanged(e) {
-    this.selectvalue = e.value;
   }
 
   GetEvalByUSR() {
     this.taskService.getEvalByObj(this.idst)
       .subscribe(evals => {
-        // let newdiag = evals.sort((a, b) => a._id - b._id);
         this.newarrs = evals;
       });
   }
@@ -80,7 +68,13 @@ export class EvaluacionComponent implements OnInit {
   EliminarEval(id) {
     this.taskService.DeleteEval(id)
       .subscribe(evals => {
+        console.log(evals);
+        this.GetEvalByUSR();
+        // location.reload();
       });
-    location.reload();
+
   }
+
+
+
 }

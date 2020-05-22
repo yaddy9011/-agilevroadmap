@@ -147,6 +147,13 @@ mat-header-cell{
 } */
 
 
+#textNotas{
+  text-align: justify;
+  white-space: normal;
+  border:solid 1px rgb(194, 190, 190);
+}
+
+
 .mat-column-n_obj {
   flex: 0 0 150px;
   /* background-color: blueviolet; */
@@ -171,7 +178,6 @@ mat-header-cell{
 .mat-column-notas {
   flex: 0 0 12%;
  /* background-color: yellowgreen;  */
-  justify-content:center;
 }
 
 .mat-column-NoInteresa {

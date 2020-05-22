@@ -15,7 +15,7 @@
   --second-color:#ff5757;
   --first-letra: #fff;
   --second-letra: #fff;
-  --blue: #007bff;
+  --colorfiltro: #ffc5ae;
   --indigo: #6610f2;
   --purple: #6f42c1;
   --pink: #e83e8c;
@@ -53,6 +53,7 @@
 
 #mat-button{
   background-color: var(--first-color);
+  color: var(--first-letra)!important;
 }
 
 .example-card {

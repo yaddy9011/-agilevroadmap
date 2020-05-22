@@ -1,0 +1,8 @@
+.mat-dialog-actions {
+      justify-content: center;
+  }
+
+  #textDialog{
+  text-align: justify;
+  white-space: normal;
+  }

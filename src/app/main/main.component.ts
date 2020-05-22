@@ -12,6 +12,9 @@ import { MatTable } from '@angular/material/table';
 import { CdkDragDrop, CdkDragStart, moveItemInArray, transferArrayItem, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Diamessage } from '../Dialogs/Diamessage';
+
 
 
 @Component({
@@ -61,7 +64,7 @@ export class MainComponent implements OnInit {
   visibledescriptionprac = false;
   DataRdp = [];
   visiblegriddp = false;
-  panelOpenStatePrac = false;
+  panelOpenStatePrac = true;
   dragDisabled = true;
   hiddenNC: Boolean = true;
   positionFilter = new FormControl();
@@ -71,15 +74,36 @@ export class MainComponent implements OnInit {
   displayedColumnsPrac: string[];
 
   filterbyAplicable: boolean;
-  FILTRO_: boolean;
-  FILTRO_NA: boolean;
-  FILTRO_DE: boolean;
-  FILTRO_NOAP: boolean;
   filterbyNA;
   filterbyDE;
   filterbyNOAP;
+
+
+  FILTRO_: boolean = false;
+  FILTRO_NA: boolean = false;
+  FILTRO_DE: boolean = false;
+  FILTRO_NUM_PRAC: boolean = false;
+  FILTRO_TEXT_PRAC = false;
+  FILTRO_METODO = false;
+  FILTRO_NOTAS_PRAC = false;
+
+
+
+
+
+
+  FILTRO_NOAP: boolean = false;
+  FILTRO_NOTAS_OBJ = false;
+  FILTRO_TEXT_OBJ = false;
+  FILTRO_NUM_OBJ = false;
+  FILTRO_NIVEL = false;
+
+
+
   DisablePriorizacion = false;
-  DisablePriorizacionobj = false;
+
+  dragcursorPrac = true;
+  dragcursorOBJ = true;
 
   DisableNC = false;
 
@@ -103,7 +127,7 @@ export class MainComponent implements OnInit {
 
 
   constructor(
-
+    public dialog: MatDialog,
     public taskService: TasksService,
     private CrudRopService: CrudRopService,
     private viewportScroller: ViewportScroller) {
@@ -241,13 +265,23 @@ export class MainComponent implements OnInit {
           var filter = this.objs.filter(x => x.NoInteresa == this.filterbyNOAP);
           this.objs = filter;
         } else {
-          this.GetDiagnosticLive();
           if (ch == true) {
-            let array = this.objs.concat(this.objs.splice(v, 1));
-            this.objs = array;
-            this.Subobjs = this.objs;
-            this.ActualizarOrderRow();
-            notify("La objetivo  OBJ" + this.objs[v].n_obj + " se ha movido hacia final de la lista.", "success", 3000);
+            var resuldia = this.Dialog("¿Desea mover OBJ "
+              + this.objs[v].n_obj +
+              " al final de la lista?", 1);
+            resuldia.then((res) => {
+              if (res == true) {
+                let array = this.objs.concat(this.objs.splice(v, 1));
+                this.objs = array;
+                this.Subobjs = this.objs;
+                this.ActualizarOrderRow();
+                notify("El OBJ" + this.objs[v].n_obj +
+                  " se ha movido hacia final de la lista.",
+                  "success", 3000);
+              }
+            }).catch((error) => {
+              console.log(error);
+            });
           }
         }
       });
@@ -265,8 +299,13 @@ export class MainComponent implements OnInit {
 
   EventshowROP(e, no, SHOWROP) {
     SHOWROP = !SHOWROP;
-    var r_srow_new = this.objs.map(function (p, j) { return p.showro = false; });
-    if (SHOWROP === true) {
+    var r_srow_new = this.objs.map(function (p, j) {
+      p.showro = false;
+      return p;
+    });
+    this.objs = r_srow_new;
+
+    if (SHOWROP == true) {
       this.DisableNC = true;
       var prac = this.Practicas.map(function (num) {
         num.colorRPP = false;
@@ -275,7 +314,7 @@ export class MainComponent implements OnInit {
       });
       this._nprac = 0;
       this._nobj = no;
-      this.panelOpenStatePrac = !this.panelOpenStatePrac;
+      this.panelOpenStatePrac = true;
       this.viewportScroller.scrollToAnchor("SlideTo");
       const index = this.objs.findIndex(element => element.n_obj == no);
       this.objs[index].showro = true;
@@ -345,8 +384,9 @@ export class MainComponent implements OnInit {
     if (Number(e) == 1) {
       this.FILTRO_NOAP = false;
       this.getObjetivos(this.id_usr);
+      this.dragcursorOBJ = true;
     } else {
-
+      this.dragcursorOBJ = false;
       switch (Number(e)) {
         case 2: {
           this.FILTRO_NOAP = true;
@@ -359,7 +399,6 @@ export class MainComponent implements OnInit {
           break;
         }
       }
-
       this.filterbyNOAP = nointeress;
       var filter = objetivos.filter(x => x.NoInteresa == nointeress);
       this.objs = filter;
@@ -375,8 +414,9 @@ export class MainComponent implements OnInit {
       // this.GetDiagnosticLive();
       this.objs = this.Subobjs;
       this.LimpiarFiltrosStringObjetivos(1);
+      this.dragcursorOBJ = true;
     } else {
-      this.DisablePriorizacionobj = true;
+      this.dragcursorOBJ = false;
       if (colum == 1) {
         var filresul = objetivos.filter(x => x.n_obj == parseInt(filterValue));
         this.objs = filresul;
@@ -414,6 +454,10 @@ export class MainComponent implements OnInit {
         this.InputStringTextObj = '';
         this.InputStringDiagObj = '';
         this.InputStringNotasObj = '';
+        this.FILTRO_NUM_OBJ = false;
+        this.FILTRO_TEXT_OBJ = false;
+        this.FILTRO_NIVEL = false;
+        this.FILTRO_NOTAS_OBJ = false;
         break;
       }
       case 2: {
@@ -421,6 +465,11 @@ export class MainComponent implements OnInit {
         this.InputStringDiagObj = '';
         this.InputStringNotasObj = '';
         this.selectNoInteresa = 1;
+        this.FILTRO_NUM_OBJ = true;
+        this.FILTRO_TEXT_OBJ = false;
+        this.FILTRO_NIVEL = false;
+        this.FILTRO_NOTAS_OBJ = false;
+        this.FILTRO_NOAP = false;
         break;
       }
       case 3: {
@@ -428,6 +477,11 @@ export class MainComponent implements OnInit {
         this.InputStringDiagObj = '';
         this.InputStringNotasObj = '';
         this.selectNoInteresa = 1;
+        this.FILTRO_NUM_OBJ = false;
+        this.FILTRO_TEXT_OBJ = true;
+        this.FILTRO_NIVEL = false;
+        this.FILTRO_NOTAS_OBJ = false;
+        this.FILTRO_NOAP = false;
         break;
       }
       case 4: {
@@ -435,6 +489,11 @@ export class MainComponent implements OnInit {
         this.InputStringTextObj = '';
         this.InputStringNotasPrac = '';
         this.selectNoInteresa = 1;
+        this.FILTRO_NUM_OBJ = false;
+        this.FILTRO_TEXT_OBJ = false;
+        this.FILTRO_NIVEL = true;
+        this.FILTRO_NOTAS_OBJ = false;
+        this.FILTRO_NOAP = false;
         break;
       }
       case 5: {
@@ -442,6 +501,11 @@ export class MainComponent implements OnInit {
         this.InputStringTextObj = '';
         this.InputStringDiagObj = '';
         this.selectNoInteresa = 1;
+        this.FILTRO_NUM_OBJ = false;
+        this.FILTRO_TEXT_OBJ = false;
+        this.FILTRO_NIVEL = false;
+        this.FILTRO_NOTAS_OBJ = true;
+        this.FILTRO_NOAP = false;
         break;
       }
     }
@@ -452,8 +516,13 @@ export class MainComponent implements OnInit {
   RelacionOP(no) {
     this.CrudRopService.GetRop()
       .subscribe(rop => {
+        var prac = this.Practicas.map(function (num) {
+          num.colorROP = false;
+          num.nivel_contribucion = "";
+          return num;
+        });
         var arrPPnew = [];
-        arrPPnew = this.Practicas;
+        arrPPnew = prac;
         rop.forEach(function (value) {
           if (value.n_obj == no) {
             let p = value.n_prac.valueOf();
@@ -609,12 +678,10 @@ export class MainComponent implements OnInit {
   }
 
   onChangeNA(deviceValue, desaf, _id, e, n_prac) {
-
     var ActPractica = {
       _id: _id,
       na: Number(deviceValue)
     };
-
     this.taskService.updateNA(ActPractica)
       .subscribe(res => {
         const index = this.Practicas.findIndex(element => element.n_prac == n_prac);
@@ -626,20 +693,29 @@ export class MainComponent implements OnInit {
         }
         this.Practicas[index].sw = showwarningna;
         this.Practicas[index].nivelapli = Number(deviceValue);
-
         if (this.FILTRO_NA == true) {
           var filter = this.Practicas.filter(x => x.nivelapli == this.filterbyNA);
           this.Practicas = filter;
         } else {
           if (Number(deviceValue) == 5) {
-            let array = this.Practicas.concat(this.Practicas.splice(index, 1));
-            this.Practicas = array;
-            this.reOrderPrac();
-            this.orderNA();
-            this.OrderAplicables();
-            notify("La práctica " + this.Practicas[index].num + " se ha movido hacia final de la lista.", "success", 3000);
+            var resuldia = this.Dialog("¿Desea mover "
+              + this.Practicas[index].num +
+              " al final de la lista?", 1);
+            resuldia.then((res) => {
+              if (res == true) {
+                let array = this.Practicas.concat(this.Practicas.splice(index, 1));
+                this.Practicas = array;
+                this.reOrderPrac();
+                this.orderNA();
+                this.OrderAplicables();
+                notify("La " + this.Practicas[index].num +
+                  " se ha movido hacia final de la lista.", "success",
+                  3000);
+              }
+            }).catch((error) => {
+              console.log(error);
+            });
           }
-
         }
         this.tableprac.renderRows();
         this.GetDiagnosticLive();
@@ -668,7 +744,6 @@ export class MainComponent implements OnInit {
   }
 
   onChangeAplicable(e, num) {
-
     var ActPractica = {
       _id: e.currentTarget.value,
       aplicable: e.currentTarget.checked
@@ -681,23 +756,41 @@ export class MainComponent implements OnInit {
       .subscribe(res => {
         const v = this.Practicas.findIndex((item) => item._id === id);
         this.Practicas[v].aplicable = aplicable;
-
         if (this.FILTRO_) {
           var filter = this.Practicas.filter(x => x.aplicable == this.filterbyAplicable);
           this.Practicas = filter;
         } else {
           if (aplicable == true) {
-            let array = this.Practicas.concat(this.Practicas.splice(v, 1));
-            this.Practicas = array;
-            notify("La práctica " + num + " se ha movido hacia final de la lista.", "success", 3000);
-            this.orderNA();
-            this.OrderAplicables();
-            this.reOrderPrac();
+            var resuldia = this.Dialog("¿Desea mover " + num + " al final de la lista?", 1);
+            resuldia.then((res) => {
+              if (res == true) {
+                let array = this.Practicas.concat(this.Practicas.splice(v, 1));
+                this.Practicas = array;
+                notify("La " + num + " se ha movido hacia final de la lista.", "success", 3000);
+                this.orderNA();
+                this.OrderAplicables();
+                this.reOrderPrac();
+              }
+            }).catch((error) => {
+              console.log(error);
+            });
           }
           this.SubPracticas = this.Practicas;
         }
         this.GetDiagnosticLive();
       });
+  }
+
+  public Dialog(message, option) {
+    const dialogRef = this.dialog.open(Diamessage, {
+      width: '250px',
+      data: {
+        message: message,
+        option: option
+      }
+    });
+    const promise = dialogRef.afterClosed().toPromise();
+    return promise;
   }
 
   onChangeNotasPracticas(e, id) {
@@ -746,7 +839,6 @@ export class MainComponent implements OnInit {
     this.FILTRO_ = false;
     this.LimpiarFiltrosString(1);
     this.getPracticas(this.id_usr, false);
-    this.DisablePriorizacion = false;
   }
 
   eventAplicables(e) {
@@ -758,7 +850,6 @@ export class MainComponent implements OnInit {
     this.FILTRO_ = false;
     this.LimpiarFiltrosString(1);
     this.getPracticas(this.id_usr, false);
-    this.DisablePriorizacion = false;
   }
 
   orderNA() {
@@ -904,11 +995,14 @@ export class MainComponent implements OnInit {
   }
 
   showColumn() {
+    var colums = ['n_prac', 'textprac', 'metodologia', 'desafio', 'na', 'notas', 'aplicable', 'nc'];
     if (this.hiddenNC == false) {
-      this.displayedColumnsPrac.push('nc');
+      colums = colums;
     } else {
-      this.displayedColumnsPrac = ['n_prac', 'textprac', 'metodologia', 'desafio', 'na', 'notas', 'aplicable'];
+      var colfil = colums.filter(e => e !== 'nc');
+      colums = colfil;
     }
+    this.displayedColumnsPrac = colums;
   }
 
   //Filtros Practicas
@@ -921,11 +1015,11 @@ export class MainComponent implements OnInit {
     practicass = this.SubPracticas;
     var desaf = e;
     if (desaf == -1) {
-      this.DisablePriorizacion = false;
+      this.dragcursorPrac = true;
       this.getPracticas(this.id_usr, false);
       this.FILTRO_DE = false;
     } else {
-      this.DisablePriorizacion = true;
+      this.dragcursorPrac = false;
       this.FILTRO_DE = true;
       this.filterbyDE = desaf;
       var filter = practicass.filter(x => x.desafio == desaf);
@@ -942,10 +1036,12 @@ export class MainComponent implements OnInit {
     var na = e;
     if (na == -1) {
       this.getPracticas(this.id_usr, false);
-      this.DisablePriorizacion = false;
+     
+      this.dragcursorPrac = true;
       this.FILTRO_NA = false;
     } else {
-      this.DisablePriorizacion = true;
+      this.dragcursorPrac = false;
+     
       this.FILTRO_NA = true;
       this.filterbyNA = na;
       var filter = practicass.filter(x => x.nivelapli == na);
@@ -959,11 +1055,13 @@ export class MainComponent implements OnInit {
     this.selectnaval = -1;
     this.LimpiarFiltrosString(1);
     if (apli == 1) {
-      this.DisablePriorizacion = false;
+  
+      this.dragcursorPrac = true;
       this.FILTRO_ = false;
       this.getPracticas(this.id_usr, false);
     } else {
-      this.DisablePriorizacion = true;
+      this.dragcursorPrac = false;
+   
       var practicass = [];
       practicass = this.SubPracticas;
 
@@ -990,16 +1088,14 @@ export class MainComponent implements OnInit {
     this.selectaplicableval = 1;
     this.selectdesafioval = -1;
     this.selectnaval = -1;
-    this.FILTRO_DE = false;
-    this.FILTRO_NA = false;
-    this.FILTRO_ = false;
     if (filterValue === "undefined" || filterValue === "") {
-      // this.getPracticas(this.id_usr, false);
-      this.DisablePriorizacion = false;
+  
+      this.dragcursorPrac = true;
       this.LimpiarFiltrosString(1);
-      this.Practicas= this.SubPracticas;
+      this.Practicas = this.SubPracticas;
     } else {
-      this.DisablePriorizacion = true;
+      this.dragcursorPrac = false;
+    
       practicass = this.SubPracticas;
       columnaname = "";
       var data;
@@ -1045,30 +1141,65 @@ export class MainComponent implements OnInit {
         this.InputStringTextPrac = '';
         this.InputStringMetodo = '';
         this.InputStringNotasPrac = '';
+        this.FILTRO_ = false;
+        this.FILTRO_NA = false;
+        this.FILTRO_DE = false;
+        this.FILTRO_NUM_PRAC = false;
+        this.FILTRO_TEXT_PRAC = false;
+        this.FILTRO_METODO = false;
+        this.FILTRO_NOTAS_PRAC = false;
         break;
       }
       case 2: {
         this.InputStringTextPrac = '';
         this.InputStringMetodo = '';
         this.InputStringNotasPrac = '';
+        this.FILTRO_ = false;
+        this.FILTRO_NA = false;
+        this.FILTRO_DE = false;
+        this.FILTRO_NUM_PRAC = true;
+        this.FILTRO_TEXT_PRAC = false;
+        this.FILTRO_METODO = false;
+        this.FILTRO_NOTAS_PRAC = false;
         break;
       }
       case 3: {
         this.InputStringnprac = '';
         this.InputStringMetodo = '';
         this.InputStringNotasPrac = '';
+        this.FILTRO_ = false;
+        this.FILTRO_NA = false;
+        this.FILTRO_DE = false;
+        this.FILTRO_NUM_PRAC = false;
+        this.FILTRO_TEXT_PRAC = true;
+        this.FILTRO_METODO = true;
+        this.FILTRO_NOTAS_PRAC = false;
         break;
       }
       case 4: {
         this.InputStringnprac = '';
         this.InputStringTextPrac = '';
         this.InputStringNotasPrac = '';
+        this.FILTRO_ = false;
+        this.FILTRO_NA = false;
+        this.FILTRO_DE = false;
+        this.FILTRO_NUM_PRAC = false;
+        this.FILTRO_TEXT_PRAC = false;
+        this.FILTRO_METODO = true;
+        this.FILTRO_NOTAS_PRAC = false;
         break;
       }
       case 5: {
         this.InputStringnprac = '';
         this.InputStringTextPrac = '';
         this.InputStringMetodo = '';
+        this.FILTRO_ = false;
+        this.FILTRO_NA = false;
+        this.FILTRO_DE = false;
+        this.FILTRO_NUM_PRAC = false;
+        this.FILTRO_TEXT_PRAC = false;
+        this.FILTRO_METODO = false;
+        this.FILTRO_NOTAS_PRAC = true;
         break;
       }
     }

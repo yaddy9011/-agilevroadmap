@@ -51,11 +51,12 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { GridModule } from '@syncfusion/ej2-angular-grids';
 import { EquipoAgileComponent } from './equipo-agile/equipo-agile.component';
 import { ValidEmailComponent } from './valid-email/valid-email.component';
-import { AgGridModule } from 'ag-grid-angular';
 import { InfoAcercaDeComponent } from './info-acerca-de/info-acerca-de.component';
 import { InfoPasosRoadmapComponent } from './info-pasos-roadmap/info-pasos-roadmap.component';
 import { InfoPracticasComponent } from './info-practicas/info-practicas.component';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {Diamessage} from './Dialogs/Diamessage';
 
 @NgModule({
   declarations: [
@@ -77,9 +78,10 @@ import {MatGridListModule} from '@angular/material/grid-list';
     ValidEmailComponent,
     InfoAcercaDeComponent,
     InfoPasosRoadmapComponent,
-    InfoPracticasComponent
+    InfoPracticasComponent,
+    Diamessage
   ],
-  entryComponents: [],
+  entryComponents: [Diamessage],
   imports: [
     NgbModule,
     BrowserModule,
@@ -108,7 +110,6 @@ import {MatGridListModule} from '@angular/material/grid-list';
     MatTabsModule,
     DevExtremeModule,
     SortablejsModule.forRoot({}),
-    NgxPaginationModule,
     ShowHidePasswordModule,
     MatCheckboxModule,
     MatButtonToggleModule,
@@ -116,7 +117,8 @@ import {MatGridListModule} from '@angular/material/grid-list';
     MatTooltipModule,
     GridModule,
     MatGridListModule,
-    AgGridModule.withComponents([])
+    MatPaginatorModule,
+    NgxPaginationModule
   ],
   providers: [AuthService, TasksService, AppGlobals],
   bootstrap: [AppComponent]

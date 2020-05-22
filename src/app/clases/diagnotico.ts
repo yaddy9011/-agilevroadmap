@@ -66,7 +66,7 @@ export class Diagnostico {
 
             switch (na) {
                 case 0:
-                    na_title = "No Aplica";
+                    na_title = "No Definido";
                     na_new = 0;
                     PremioNa = false;
                     break;

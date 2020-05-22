@@ -2,8 +2,9 @@
   <app-menu></app-menu>
   <div class="Appcontainer" align="center">
     <br>
+    <!-- OBJETIVOS -->
     <mat-accordion>
-      <!-- OBJETIVOS -->
+
       <div #objPanel id="objPanel">
         <mat-expansion-panel style="width:96%;" [expanded]="panelOpenStateObj">
           <mat-expansion-panel-header class="mheader">
@@ -18,7 +19,7 @@
             <br>
             <mat-table style="width:90% !important;" class="mat-elevation-z8" #table [dataSource]="objs" cdkDropList
               (cdkDropListDropped)="dropObjetivos($event)" cdkDropListData="objs" [cdkDropListDisabled]="dragDisabled">
-
+              <!-- [style.background-color]="FILTRO_NUM_OBJ ? 'var(--first-color)' : '#FFFFFF'" -->
               <ng-container matColumnDef="n_obj" sticky>
                 <mat-header-cell *matHeaderCellDef>
                   <div>
@@ -26,14 +27,16 @@
                     #
                     <br>
                     <mat-form-field style="width:80px !important">
-                      <input matInput class="form-field" (keyup)="FilterTypeTextObj($event.target.value,1)"
-                        [(ngModel)]="InputStringnobj" placeholder="">
+                      <input matInput [ngStyle]="{'background-color': 
+                      FILTRO_NUM_OBJ == true ?'var(--colorfiltro)' : 'white' }" class="form-field"
+                        (keyup)="FilterTypeTextObj($event.target.value,1)" [(ngModel)]="InputStringnobj" placeholder="">
                     </mat-form-field>
                   </div>
                 </mat-header-cell>
                 <mat-cell *matCellDef="let element">
-                  <mat-icon class="dragCursor" (mousedown)="dragDisabled = false;">reorder</mat-icon>
-                  <span style="font-size: 13px;">OBJ {{element.n_obj}} </span>
+                  <mat-icon *ngIf="dragcursorOBJ" class="dragCursor" (mousedown)="dragDisabled = false;">reorder
+                  </mat-icon>
+                  <span style="font-size: 13px;">OBJ {{element.n_obj}} &nbsp;</span>
                   <mat-icon color="primary" n matTooltip="Ver prácticas relacionadas"
                     (click)="EventshowROP($event,element.n_obj, element.showro)" [inline]="true">
                     {{ element.showro ? 'visibility_off' : 'visibility'}}
@@ -46,7 +49,9 @@
                   <div>
                     <br>objetivo <br>
                     <mat-form-field>
-                      <input matInput [(ngModel)]="InputStringTextObj" class="form-field"
+                      <input [ngStyle]="{'background-color': 
+                      FILTRO_TEXT_OBJ == true ?'var(--colorfiltro)' : 'white' }" matInput
+                        [(ngModel)]="InputStringTextObj" class="form-field"
                         (keyup)="FilterTypeTextObj($event.target.value,2)" placeholder="">
                     </mat-form-field>
                   </div>
@@ -57,11 +62,13 @@
               <ng-container matColumnDef="pd">
                 <mat-header-cell *matHeaderCellDef>
                   <div> <br>
-                    Diagnóstico
+                    Nivel
                     <br>
                     <mat-form-field style="width:80px !important">
-                      <input matInput class="form-field" (keyup)="FilterTypeTextObj($event.target.value,3)"
-                        [(ngModel)]="InputStringDiagObj" placeholder="">
+                      <input [ngStyle]="{'background-color': 
+                      FILTRO_NIVEL == true ?'var(--colorfiltro)' : 'white' }" matInput class="form-field"
+                        (keyup)="FilterTypeTextObj($event.target.value,3)" [(ngModel)]="InputStringDiagObj"
+                        placeholder="">
                     </mat-form-field>
                   </div>
                 </mat-header-cell>
@@ -80,14 +87,15 @@
                     Notas
                     <br>
                     <mat-form-field style="width:80px !important">
-                      <input matInput [(ngModel)]="InputStringNotasObj" class="form-field"
-                        (keyup)="FilterTypeTextObj($event.target.value,4)" placeholder="">
+                      <input matInput [ngStyle]="{'background-color': 
+                      FILTRO_NOTAS_OBJ == true ?'var(--colorfiltro)' : 'white' }" [(ngModel)]="InputStringNotasObj"
+                        class="form-field" (keyup)="FilterTypeTextObj($event.target.value,4)" placeholder="">
                     </mat-form-field>
                   </div>
                 </mat-header-cell>
                 <mat-cell *matCellDef="let element">
-                  <textarea rows="2" style="border:solid 1px rgb(194, 190, 190);" matInput
-                    (change)="ChangeNotasObj($event,element._id)" value="{{element.notas}}"></textarea>
+                  <textarea rows="2" id="textNotas" matInput (change)="ChangeNotasObj($event,element._id)"
+                    value="{{element.notas}}"></textarea>
                 </mat-cell>
               </ng-container>
 
@@ -98,9 +106,11 @@
                     No Interesa
                     <br>
                     <mat-form-field style="width:80px !important">
-                      <select id="selectNoInteresa" [(ngModel)]="selectNoInteresa"
-                        (change)="FilterNoInteresa($event.target.value)" matNativeControl required>
-                        <option value="1">all</option>
+                      <select [ngStyle]="{'background-color': 
+                    FILTRO_NOAP == true ?'var(--colorfiltro)' : 'white' }" id="selectNoInteresa"
+                        [(ngModel)]="selectNoInteresa" (change)="FilterNoInteresa($event.target.value)" matNativeControl
+                        required>
+                        <option value="1">todos</option>
                         <option value="2">true</option>
                         <option value="3">false</option>
                       </select>
@@ -124,7 +134,7 @@
                 <dx-button icon="check" type="success" text="Done" (onClick)="doneObj()">
                 </dx-button>
                 <br>
-                <dx-scroll-view #scrollView id="scrollview" >
+                <dx-scroll-view #scrollView id="scrollview">
 
                   <div>
                     <dx-data-grid wordWrapEnabled="true" [dataSource]="DatasourseRop" [showBorders]="true"
@@ -148,10 +158,12 @@
           </div>
         </mat-expansion-panel>
       </div>
+    </mat-accordion>
+    <!-- PRACTICAS -->
+    <mat-accordion>
       <br>
-      <!-- PRACTICAS -->
-      <mat-expansion-panel style="width:96%;" [expanded]="panelOpenStatePrac" (opened)="panelOpenState = true"
-        (closed)="panelOpenState = false">
+      <mat-expansion-panel style="width:96%;" [expanded]="panelOpenStatePrac" (opened)="panelOpenStatePrac = true"
+        (closed)="panelOpenStatePrac = false">
         <mat-expansion-panel-header class="mheader">
           <mat-panel-title class="mheader-text">
             PRÁCTICAS ÁGILES
@@ -170,13 +182,12 @@
           <!-- style="width:100% !important;"  -->
 
           <div *ngIf="Practicas">
-            <p>Total de prácticas {{ Practicas.length }} </p>
+            <p>Total de prácticas {{ Practicas.length }}/42</p>
           </div>
 
           <mat-table [style.width]="DisableNC ? '96%' : '90%'" class="mat-elevation-z8" id="tableprac" #tableprac
             [dataSource]="Practicas" cdkDropList (cdkDropListDropped)="dropPracticas($event)"
             cdkDropListData="Practicas" [cdkDropListDisabled]="dragDisabled">
-
             <ng-container matColumnDef="n_prac" sticky>
               <mat-header-cell *matHeaderCellDef>
                 <div>
@@ -184,15 +195,19 @@
                   #
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <input matInput class="form-field" [(ngModel)]="InputStringnprac"
-                      (keyup)="FilterTypeText($event.target.value,1)" [formControl]="positionFilter" placeholder="">
+                    <input [ngStyle]="{'background-color': 
+                    FILTRO_NUM_PRAC == true ?'var(--colorfiltro)' : 'white' }" matInput class="form-field"
+                      [(ngModel)]="InputStringnprac" (keyup)="FilterTypeText($event.target.value,1)"
+                      [formControl]="positionFilter" placeholder="">
                   </mat-form-field>
                 </div>
               </mat-header-cell>
               <mat-cell *matCellDef="let element; let i=index;">
-                <mat-icon class="dragCursor" (mousedown)="dragDisabled = false;">reorder</mat-icon>
+                <mat-icon *ngIf="dragcursorPrac" class="dragCursor" 
+                (mousedown)="dragDisabled = false;">reorder
+                </mat-icon>
                 <div>
-                  <span align="center" style="width:40%;"> {{ element.num }} </span> <br><br>
+                  <span align="center" style="width:40%;"> {{ element.num }} </span> <br>
                   <mat-icon aria-hidden="false" (click)="DetallePractica($event,element.n_prac, element.textprac)"
                     matTooltip="ver detalle de prácticas" class="icon-display" aria-label="Example home icon">info
                   </mat-icon>
@@ -219,8 +234,9 @@
                   Práctica
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <input matInput class="form-field" [(ngModel)]="InputStringTextPrac"
-                      (keyup)="FilterTypeText($event.target.value,2)" placeholder="">
+                    <input [ngStyle]="{'background-color': 
+                    FILTRO_TEXT_PRAC == true ?'var(--colorfiltro)' : 'white' }" matInput class="form-field"
+                      [(ngModel)]="InputStringTextPrac" (keyup)="FilterTypeText($event.target.value,2)" placeholder="">
                   </mat-form-field>
                 </div>
               </mat-header-cell>
@@ -234,8 +250,9 @@
                   Método Ágil
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <input matInput class="form-field" [(ngModel)]="InputStringMetodo"
-                      (keyup)="FilterTypeText($event.target.value,3)" placeholder="">
+                    <input [ngStyle]="{'background-color': 
+                    FILTRO_METODO == true ?'var(--colorfiltro)' : 'white' }" matInput class="form-field"
+                      [(ngModel)]="InputStringMetodo" (keyup)="FilterTypeText($event.target.value,3)" placeholder="">
                   </mat-form-field>
                 </div>
               </mat-header-cell>
@@ -249,9 +266,10 @@
                   Desafío de implantación
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <select [(ngModel)]="selectdesafioval" matNativeControl required
-                      (change)="FilterDesafio($event.target.value)">
-                      <option value="-1">reset</option>
+                    <select [ngStyle]="{'background-color': 
+                    FILTRO_DE == true ?'var(--colorfiltro)' : 'white' }" [(ngModel)]="selectdesafioval"
+                      matNativeControl required (change)="FilterDesafio($event.target.value)">
+                      <option value="-1">todos</option>
                       <option *ngFor="let option of optionsDesa; index as a" [value]="a">
                         {{ option }}
                       </option>
@@ -275,9 +293,10 @@
                   Nivel de aplicación
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <select [(ngModel)]="selectnaval" matNativeControl required
-                      (change)="FilterNA($event.target.value)">
-                      <option value="-1">reset</option>
+                    <select [ngStyle]="{'background-color': 
+                    FILTRO_NA == true ?'var(--colorfiltro)' : 'white' }" [(ngModel)]="selectnaval" matNativeControl
+                      required (change)="FilterNA($event.target.value)">
+                      <option value="-1">todos</option>
                       <option *ngFor="let option of optionsNa; index as in" [value]="in">
                         {{ option }}
                       </option>
@@ -303,15 +322,16 @@
                   Notas
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <input matInput class="form-field" [(ngModel)]="InputStringNotasPrac"
-                      (keyup)="FilterTypeText($event.target.value,4)" placeholder="">
+                    <input [ngStyle]="{'background-color': 
+                    FILTRO_NOTAS_PRAC == true ?'var(--colorfiltro)' : 'white' }" matInput class="form-field"
+                      [(ngModel)]="InputStringNotasPrac" (keyup)="FilterTypeText($event.target.value,4)" placeholder="">
                   </mat-form-field>
                 </div>
 
               </mat-header-cell>
               <mat-cell *matCellDef="let element">
-                <textarea rows="2" style="border:solid 1px rgb(194, 190, 190);" matInput
-                  (change)="onChangeNotasPracticas($event,element._id)" value="{{element.notas}}"></textarea>
+                <textarea rows="2" id="textNotas" matInput (change)="onChangeNotasPracticas($event,element._id)"
+                  value="{{element.notas}}"></textarea>
               </mat-cell>
             </ng-container>
 
@@ -322,9 +342,11 @@
                   No Aplicable
                   <br>
                   <mat-form-field style="width:80px !important">
-                    <select id="selectAplicable" [(ngModel)]="selectaplicableval"
-                      (change)="FilterAplicable($event.target.value)" matNativeControl required>
-                      <option value="1">All</option>
+                    <select [ngStyle]="{'background-color': 
+                    FILTRO_ == true ?'var(--colorfiltro)' : 'white' }" id="selectAplicable"
+                      [(ngModel)]="selectaplicableval" (change)="FilterAplicable($event.target.value)" matNativeControl
+                      required>
+                      <option value="1">todos</option>
                       <option value="2">true</option>
                       <option value="3">false</option>
                     </select>
@@ -362,7 +384,7 @@
           <dx-popup [width]="500" [height]="450" [showTitle]="true" title="Práctica" [dragEnabled]="false"
             [closeOnOutsideClick]="true" [(visible)]="popupPracticaDescription">
             <div *dxTemplate="let data of 'content'">
-              <dx-scroll-view #scrollView id="scrollview" >
+              <dx-scroll-view #scrollView id="scrollview">
                 <p>
                   {{ TextP}}
                 </p>
@@ -394,6 +416,7 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+    <!-- BUTTON scrollview -->
     <button id="butt" mat-fab (click)="scroll(objPanel)">
       <mat-icon>arrow_upward</mat-icon>
     </button>
